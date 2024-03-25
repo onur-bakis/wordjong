@@ -21,6 +21,9 @@ namespace Scripts.Controller
         [SerializeField] private TextMeshProUGUI _addedWordTMPRUIPrefab;
         [SerializeField] private Transform _addedWordHolder;
 
+        [SerializeField] private Sprite _spriteTikOpen;
+        [SerializeField] private Sprite _spriteTikClose;
+
         private List<TextMeshProUGUI> _addedWordTMPRUIPool;
         private int wordCount;
         public override void Init()
@@ -65,6 +68,7 @@ namespace Scripts.Controller
         {
             _wordScoreTMPRUI.text = "Word Score: "+score.ToString();
             SubmitUI.color = canSubmit ? Color.white:Color.black;
+            SubmitButton.image.sprite = canSubmit ? _spriteTikOpen : _spriteTikClose; 
             SubmitButton.interactable = canSubmit;
         }
 

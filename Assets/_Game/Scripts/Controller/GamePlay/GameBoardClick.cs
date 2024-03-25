@@ -11,9 +11,15 @@ namespace Scripts.Controller.GamePlay
         private GamePlayManager _gamePlayManager;
         private BoardTile[] _boardTiles;
         
+        private Vector3 _cacheCameraRay;
+        private Vector3 _cacheCameraRayResults;
+        private float cameraDistance = 50f;
+        
         public GameBoardClick(GamePlayManager gamePlayManager)
         {
             _gamePlayManager = gamePlayManager;
+            _cacheCameraRay = Vector3.zero;
+            _cacheCameraRay.z = cameraDistance;
         }
 
         public void SetBoardValues(BoardTile[] boardTiles)
@@ -23,9 +29,10 @@ namespace Scripts.Controller.GamePlay
 
         public void OnInputTaken(InputDataParams inputDataParams)
         {
-            //Cache Vector3
-            Vector3 vector3 = Camera.main.ScreenToWorldPoint(
-                new Vector3(inputDataParams.width, inputDataParams.height, 100f));
+            _cacheCameraRay.x = inputDataParams.width;
+            _cacheCameraRay.y = inputDataParams.height;
+            _cacheCameraRayResults = Camera.main.ScreenToWorldPoint(_cacheCameraRay);
+            
             foreach (var boardTile in _boardTiles)
             {
                 if (boardTile.isLocked || !boardTile.onBoard || boardTile.removed || boardTile.inMove)
@@ -33,8 +40,8 @@ namespace Scripts.Controller.GamePlay
                     continue;
                 }
 
-
-                if (Vector2.Distance(vector3, boardTile.transform.position)<6f)
+                Debug.Log("Distance to "+boardTile.character+" "+Vector2.Distance(_cacheCameraRayResults, boardTile.transform.position));
+                if (Vector2.Distance(_cacheCameraRayResults, boardTile.transform.position)<3.5f)
                 {
                     _gamePlayManager.BoardTileClicked(boardTile);
                     break;

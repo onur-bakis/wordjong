@@ -46,6 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _gameBoardController: {fileID: 7773819651372519826}
+  _currentBoardTiles: []
 --- !u!1 &5868898426367454355
 GameObject:
   m_ObjectHideFlags: 0
@@ -93,3 +94,31 @@ MonoBehaviour:
   _boardTilePrefab: {fileID: 4897124335685485368, guid: 2aee0fbd5472d446ab51e4270c6e03b7,
     type: 3}
   _boardHolder: {fileID: 1155166583576183989}
+  _meshes:
+  - {fileID: 1907795020790290496, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: -1644355878584749679, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: -7746497135072881621, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: 281315202980364329, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: 8939266724133516769, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: -4909277789374002350, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: 6157117880141131119, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: 1670262680622686082, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: -3214572557560747977, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: 2658800326358589857, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: -6612916564974270675, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: -1434902202865794022, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: -6425600238377421303, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: -6048717895273133781, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: -2020707242700487084, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: -9074724860412756288, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: -4693480790355496552, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: 7429288146537312290, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: 1731728394525301911, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: 8379677281609801307, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: 7562613056849696430, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: 1464361123701606782, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: -496058992349931718, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: 8826643962087455625, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: -4161497618794897476, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  - {fileID: 6856768601106367328, guid: 5d51bf2ab3fbc4e4abc1eb5b1eae1a55, type: 3}
+  currentBoardTiles: []

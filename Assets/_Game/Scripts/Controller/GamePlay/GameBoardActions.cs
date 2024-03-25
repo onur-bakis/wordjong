@@ -11,18 +11,24 @@ namespace Scripts.Controller.GamePlay
     {
         private ActionRecorder _actionRecorder;
         private int wordCount;
-        private Vector3 startPosition = new Vector3(6.6f,14.9f,99f);
+        private Vector3 startPosition;
+        private Vector3 startPositionIncrease;
         private bool undoActive;
         private GamePlayManager _gamePlayManager;
 
         public string word="";
         public Stack<BoardTile> currentWordTiles;
 
+        private Vector3 _cachePosition;
+
         public GameBoardActions(GamePlayManager gamePlayManager)
         {
             _actionRecorder = new ActionRecorder();
             currentWordTiles = new Stack<BoardTile>();
             _gamePlayManager = gamePlayManager;
+            
+            startPosition = new Vector3(10.2f,6f,99f);
+            startPositionIncrease = Vector3.left * -4.6f;
         }
 
         public void Reset()
@@ -44,8 +50,8 @@ namespace Scripts.Controller.GamePlay
             {
                 return;
             }
-            Vector3 movePosition = startPosition + Vector3.left * (-5.8f * wordCount);
-            BoardTileMoveAction boardTileMoveAction = new BoardTileMoveAction(ref movePosition,ref boardTile);
+            _cachePosition = startPosition + startPositionIncrease * wordCount;
+            BoardTileMoveAction boardTileMoveAction = new BoardTileMoveAction(ref _cachePosition,ref boardTile);
             _actionRecorder.Record(boardTileMoveAction);
             wordCount++;
             word += boardTile.character;

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Scripts.Managers;
@@ -8,7 +9,7 @@ namespace Scripts.Controller.GamePlay
 {
     public class GameBoardCheckWord
     {
-        public List<string> _engWordList = new List<string>();
+        public HashSet<string> _engWordList = new HashSet<string>();
         private GamePlayManager _gamePlayManager;
         private List<string> _foundWords;
         public GameBoardCheckWord(GamePlayManager gamePlayManager)
@@ -17,9 +18,16 @@ namespace Scripts.Controller.GamePlay
             
             TextAsset textAsset = Resources.Load<TextAsset>("Data/en");
             var listArray = textAsset.text.Split('\n');
-            _engWordList = listArray.ToList();
-            _engWordList.Remove("");
+            List<string> cache = listArray.ToList();
+            cache.Remove("");
+            _engWordList = new HashSet<string>(cache);
             _foundWords = new List<string>();
+
+            // List<string> listtt = GeneratePermutations(new char[] { 'a', 's', 'd', 'f', 'e', 'u', 'i' }, 7);
+            // foreach (var VARIABLE in listtt)
+            // {
+            //     Debug.Log(VARIABLE);
+            // }
         }
 
         public void Reset()
@@ -34,23 +42,12 @@ namespace Scripts.Controller.GamePlay
 
         public bool LookWordAvailable(string word)
         {
-            bool canSubmit = true;
-            
             if (_foundWords.Contains(word))
             {
-                canSubmit = false;
-            }
-            
-            if (_engWordList.Contains(word.ToLower()))
-            {
-                canSubmit = true;
-            }
-            else
-            {
-                canSubmit = false;
+                return false;
             }
 
-            return canSubmit;
+            return _engWordList.Contains(word.ToLower());
         }
         
         public bool CheckRemainWords(BoardTile[] boardTiles)
@@ -63,57 +60,141 @@ namespace Scripts.Controller.GamePlay
             {
                 if (!boardTiles[i].isLocked && !boardTiles[i].removed)
                 {
-                    charSet.Add(boardTiles[i].character.ToLower()[0]);
+                    charSet.Add(boardTiles[i].character);
                 }
             }
-
-            bool remaining = CheckPermutations(charSet.ToArray(),7);
-
+            
+            
+            bool remaining = false;
+             //Check open tiles only
+             remaining = CheckPermutationsOpen(charSet.ToArray(),7);
+            
+            
+             //Check closed tiles for 3 length words only(for optimization)
+             if (!remaining)
+             {
+                 remaining = CheckPermutationsLocked(boardTiles, 3);
+             }
+            
+            //Check closed tiles for any solution (7 length words)
+            if (!remaining)
+            {
+                remaining = CheckPermutationsLocked(boardTiles, 7);
+            }
+            
             return remaining;
         }
 
-        
-        #region Permutations
-        public bool CheckPermutationsWithLock(string startString,char[] charList,int maxLength)
-        {
-            List<string> permutations = GeneratePermutations(charList,maxLength);
-        
-            permutations.Remove("");
-            foreach (string permutation in permutations)
-            {
-                if (_engWordList.Contains(startString+permutation))
-                {
-                    return true;
-                }
-            }
 
-            return false;
-        }
-        
-        public bool CheckPermutations(char[] charList,int maxLength)
+        #region PermutationsLocked
+
+        private Dictionary<int, BoardTile> _cleanedBoardTiles;
+        private List<Char> _remainingChars;
+        private string _remainingWord;
+        private bool lockedWord;
+        private bool CheckPermutationsLocked(BoardTile[] boardTiles, int maxLength)
         {
-            List<string> permutations = GeneratePermutations(charList,maxLength);
-        
-            permutations.Remove("");
-            foreach (string permutation in permutations)
-            {
-                if (_engWordList.Contains(permutation))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-        
-        static List<string> GeneratePermutations(char[] charList, int maxLength)
-        {
-            List<string> permutations = new List<string>();
-            GeneratePermutationsHelper(charList, new bool[charList.Length], "", 0, maxLength, permutations);
-            return permutations;
+            _cleanedBoardTiles = new Dictionary<int, BoardTile>();
+            _remainingChars = new List<char>();
+            lockedWord = false;
+            CleanBoardTiles(boardTiles);
+            Debug.Log("CheckPermutationsLockedBefore");
+            GeneratePermutationsLocked(_remainingChars.ToArray(),maxLength);
+            Debug.Log("CheckPermutationsLocked"+j);
+            return lockedWord;
         }
 
-        static void GeneratePermutationsHelper(char[] charList, bool[] used, string current, int length, int maxLength, List<string> permutations)
+        private void CheckString(string word)
         {
+            //Debug.Log("-----------------------");
+            //Debug.Log("CheckString"+word);
+            if (_engWordList.Contains(word.ToLower()))
+            {
+                i = 0;
+                _remainingWord = "";
+                //Debug.Log("EngWord"+word);
+                PlayBoard(word,0,_cleanedBoardTiles);
+                //Debug.Log("PlayWord "+i+" Try"+_remainingWord);
+                if (_remainingWord != "")
+                {
+                    lockedWord = true;
+                }
+            }
+        }
+
+        private int i = 0;
+        private void PlayBoard(string goalWord,int charIndex,Dictionary<int,BoardTile> cleanedBoardTiles)
+        {
+            i++;
+            if (i > 99999)
+            {
+                Debug.LogError("I"+9999);
+                return;
+            }
+
+            foreach (var idTile in cleanedBoardTiles)
+            {
+                if (charIndex == goalWord.Length)
+                {
+                    _remainingWord = goalWord;
+                    Debug.Log("goalWord"+_remainingWord);
+                    return;
+                }
+
+                bool unlocked = !idTile.Value.isLocked;
+                bool charMatch = idTile.Value.character == goalWord[charIndex];
+
+                if (unlocked && charMatch)
+                {
+                    idTile.Value.removed = true;
+                    for (int i = 0; i < idTile.Value.children.Length; i++)
+                    {
+                        cleanedBoardTiles[idTile.Value.children[i]].SetLockView(-1);
+                    }
+
+                    PlayBoard(goalWord, charIndex+1, cleanedBoardTiles);
+                    
+                    idTile.Value.removed = false;
+                    for (int i = 0; i < idTile.Value.children.Length; i++)
+                    {
+                        cleanedBoardTiles[idTile.Value.children[i]].SetLockView(+1);;
+                    }
+                    
+                }
+            }
+        }
+
+        private void CleanBoardTiles(BoardTile[] boardTiles)
+        {
+            foreach (var bTile in boardTiles)
+            {
+                if (!bTile.removed)
+                {
+                    _remainingChars.Add(bTile.character);
+                    _cleanedBoardTiles.Add(bTile._id,bTile);
+                }
+            }
+        }
+        
+        private int j = 0;
+        public void GeneratePermutationsLocked(char[] charList, int maxLength)
+        {
+            j = 0;
+            GeneratePermutationsHelperLocked(charList, new bool[charList.Length], "", 0, maxLength);
+        }
+
+        public void GeneratePermutationsHelperLocked(char[] charList, bool[] used, string current, int length, int maxLength)
+        {
+            j++;
+            if (lockedWord)
+            {
+                return;
+            }
+            if (j > 99999)
+            {
+                Debug.LogError("J"+9999);
+                return;
+            }
             if (length > maxLength)
             {
                 return;
@@ -121,7 +202,8 @@ namespace Scripts.Controller.GamePlay
 
             if (length > 0)
             {
-                permutations.Add(current);
+                CheckString(current);
+                Debug.Log(current);
             }
 
             for (int i = 0; i < charList.Length; i++)
@@ -129,7 +211,51 @@ namespace Scripts.Controller.GamePlay
                 if (!used[i])
                 {
                     used[i] = true;
-                    GeneratePermutationsHelper(charList, used, current + charList[i], length + 1, maxLength, permutations);
+                    GeneratePermutationsHelperLocked(charList, used, current + charList[i], length + 1, maxLength);
+                    used[i] = false;
+                }
+            }
+        }
+        #endregion
+        
+        #region PermutationsOpen
+
+        private bool breakRecursive = false;
+        public bool CheckPermutationsOpen(char[] charList,int maxLength)
+        {
+            breakRecursive = false;
+            GeneratePermutationsOpen(charList,maxLength);
+            if (breakRecursive)
+            {
+                return true;
+            }
+            return false;
+        }
+        
+        public void GeneratePermutationsOpen(char[] charList, int maxLength)
+        {
+            GeneratePermutationsHelperOpen(charList, new bool[charList.Length], "", 0, maxLength);
+        }
+
+        public void GeneratePermutationsHelperOpen(char[] charList, bool[] used, string current, int length, int maxLength)
+        {
+            if(breakRecursive)
+                return;
+            
+            if (length > 0)
+            {
+                if (_engWordList.Contains(current))
+                {
+                    breakRecursive = true;
+                }
+            }
+
+            for (int i = 0; i < charList.Length; i++)
+            {
+                if (!used[i])
+                {
+                    used[i] = true;
+                    GeneratePermutationsHelperOpen(charList, used, current + charList[i], length + 1, maxLength);
                     used[i] = false;
                 }
             }

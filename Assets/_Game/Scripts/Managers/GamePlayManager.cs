@@ -96,6 +96,7 @@ namespace Scripts.Managers
             
             if (!remainAnyWords)
             {
+                _gameBoardCheckWord.Reset();
                 //ResetScore TotalScore
                 _gameBoardScore.Reset();
                 //Check HighScore
