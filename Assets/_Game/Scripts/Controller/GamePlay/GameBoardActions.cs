@@ -27,8 +27,8 @@ namespace Scripts.Controller.GamePlay
             currentWordTiles = new Stack<BoardTile>();
             _gamePlayManager = gamePlayManager;
             
-            startPosition = new Vector3(10.2f,6f,99f);
-            startPositionIncrease = Vector3.left * -4.6f;
+            startPosition = new Vector3(9f,15f,90f);
+            startPositionIncrease = Vector3.left * -5f;
         }
 
         public void Reset()

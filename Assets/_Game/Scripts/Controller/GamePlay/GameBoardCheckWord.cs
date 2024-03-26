@@ -22,12 +22,7 @@ namespace Scripts.Controller.GamePlay
             cache.Remove("");
             _engWordList = new HashSet<string>(cache);
             _foundWords = new List<string>();
-
-            // List<string> listtt = GeneratePermutations(new char[] { 'a', 's', 'd', 'f', 'e', 'u', 'i' }, 7);
-            // foreach (var VARIABLE in listtt)
-            // {
-            //     Debug.Log(VARIABLE);
-            // }
+            
         }
 
         public void Reset()
@@ -64,18 +59,40 @@ namespace Scripts.Controller.GamePlay
                 }
             }
             
-            
+            //Looking for playable moves is more efficient Change this
             bool remaining = false;
              //Check open tiles only
-             remaining = CheckPermutationsOpen(charSet.ToArray(),7);
+             remaining = CheckPermutationsOpen(charSet.ToArray(),2);
             
             
              //Check closed tiles for 3 length words only(for optimization)
              if (!remaining)
              {
+                 remaining = CheckPermutationsLocked(boardTiles, 2);
+             }
+
+             if (!remaining)
+             {
+                 remaining = CheckPermutationsOpen(charSet.ToArray(), 3);
+             }
+
+             //Check closed tiles for 3 length words only(for optimization)
+             if (!remaining)
+             {
                  remaining = CheckPermutationsLocked(boardTiles, 3);
              }
-            
+             
+             if (!remaining)
+             {
+                 remaining = CheckPermutationsOpen(charSet.ToArray(), 5);
+             }
+
+             //Check closed tiles for 3 length words only(for optimization)
+             if (!remaining)
+             {
+                 remaining = CheckPermutationsLocked(boardTiles, 5);
+             }
+             
             //Check closed tiles for any solution (7 length words)
             if (!remaining)
             {
@@ -98,23 +115,17 @@ namespace Scripts.Controller.GamePlay
             _remainingChars = new List<char>();
             lockedWord = false;
             CleanBoardTiles(boardTiles);
-            Debug.Log("CheckPermutationsLockedBefore");
             GeneratePermutationsLocked(_remainingChars.ToArray(),maxLength);
-            Debug.Log("CheckPermutationsLocked"+j);
             return lockedWord;
         }
 
         private void CheckString(string word)
         {
-            //Debug.Log("-----------------------");
-            //Debug.Log("CheckString"+word);
             if (_engWordList.Contains(word.ToLower()))
             {
                 i = 0;
                 _remainingWord = "";
-                //Debug.Log("EngWord"+word);
                 PlayBoard(word,0,_cleanedBoardTiles);
-                //Debug.Log("PlayWord "+i+" Try"+_remainingWord);
                 if (_remainingWord != "")
                 {
                     lockedWord = true;
@@ -137,7 +148,6 @@ namespace Scripts.Controller.GamePlay
                 if (charIndex == goalWord.Length)
                 {
                     _remainingWord = goalWord;
-                    Debug.Log("goalWord"+_remainingWord);
                     return;
                 }
 
@@ -203,7 +213,6 @@ namespace Scripts.Controller.GamePlay
             if (length > 0)
             {
                 CheckString(current);
-                Debug.Log(current);
             }
 
             for (int i = 0; i < charList.Length; i++)

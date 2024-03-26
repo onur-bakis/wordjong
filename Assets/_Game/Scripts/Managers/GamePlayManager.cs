@@ -24,10 +24,12 @@ namespace Scripts.Managers
         
         private int _currentLevelNumber;
         private LevelData _currentLevelData;
-        public BoardTile[] _currentBoardTiles;
 
         private WordCheckParams _cacheWordCheckParams;        
         private LevelFinishParams _cacheLevelFinishParams;
+
+        public int remainingBoardTiles = 0;
+        public BoardTile[] _currentBoardTiles;
 
         protected override void Awake()
         {
@@ -53,10 +55,13 @@ namespace Scripts.Managers
         {
             _currentLevelNumber = LevelDataManager.currentLevelNumber;
             _currentLevelData = LevelDataManager.currentLevelData;
-            
+
+            remainingBoardTiles = _currentLevelData.tiles.Length;
             _currentBoardTiles = _gameBoardController.SetBoard(_currentLevelNumber,_currentLevelData);
             _gameBoardClick.SetBoardValues(_currentBoardTiles);
             _gameBoardActions.Reset();
+            
+            _gameBoardController.OpenTiles(true);
 
             SubscribeEvents();
         }
@@ -85,7 +90,10 @@ namespace Scripts.Managers
             //New total score is calculated
             int newScore = _gameBoardScore.AddScore(word);
             
-
+            _gameBoardController.SubmitAnimation();
+            
+            remainingBoardTiles -= word.Length;
+            
             //Update UIs
             GameBoardSignals.onTopScoreChange.Invoke(newScore);
             GameBoardSignals.onNewWordAdded.Invoke(word);
@@ -96,9 +104,7 @@ namespace Scripts.Managers
             
             if (!remainAnyWords)
             {
-                _gameBoardCheckWord.Reset();
-                //ResetScore TotalScore
-                _gameBoardScore.Reset();
+                newScore -= remainingBoardTiles * 100;
                 //Check HighScore
                 if (newScore > LevelDataManager.GetLevelScore(_currentLevelNumber))
                 {
@@ -112,13 +118,23 @@ namespace Scripts.Managers
                 _cacheLevelFinishParams.score = newScore;
                 
                 UnSubscribeEvents();
-                _gameBoardController.LevelFinished();
                 int currentLock = LevelDataManager.GetNewUnlock();
                 if (currentLock == _currentLevelNumber || currentLock == -1)
                 {
-                    LevelDataManager.NewUnLock(_currentLevelNumber+1);
+                    if (remainingBoardTiles ==0)
+                    {
+                        LevelDataManager.NewUnLock(_currentLevelNumber+1);
+                    }
                 }
-
+                
+                //Clears found words
+                _gameBoardCheckWord.Reset();
+                //Resets score and totalScore
+                _gameBoardScore.Reset();
+                //Send tiles to pools and clear board
+                _gameBoardController.LevelFinished();
+                _gameBoardController.OpenTiles(false);
+                
                 LevelDataManager.levelFinishParams = _cacheLevelFinishParams;
                 CoreGameSignals.onLevelFinished(_cacheLevelFinishParams);
             }

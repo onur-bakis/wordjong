@@ -40,7 +40,6 @@ namespace Scripts.Controller.GamePlay
                     continue;
                 }
 
-                Debug.Log("Distance to "+boardTile.character+" "+Vector2.Distance(_cacheCameraRayResults, boardTile.transform.position));
                 if (Vector2.Distance(_cacheCameraRayResults, boardTile.transform.position)<3.5f)
                 {
                     _gamePlayManager.BoardTileClicked(boardTile);

@@ -23,6 +23,7 @@ namespace Scripts.Controller
 
         [SerializeField] private Sprite _spriteTikOpen;
         [SerializeField] private Sprite _spriteTikClose;
+        [SerializeField] private ScrollRect _addedWordScrollRect;
 
         private List<TextMeshProUGUI> _addedWordTMPRUIPool;
         private int wordCount;
@@ -39,6 +40,7 @@ namespace Scripts.Controller
             OnChangeUndoVisual(false);
             WordScoreChange(0,false);
             OnTopScoreChange(0);
+            _addedWordScrollRect.verticalScrollbar.value = 1f;
         }
 
         public override void Show()
@@ -51,6 +53,12 @@ namespace Scripts.Controller
         public override void HidePanel()
         {
             base.HidePanel();
+
+        }
+
+        public override void OnHideFinish()
+        {
+            base.OnHideFinish();
             foreach (TextMeshProUGUI addedWordTMPRUI in _addedWordTMPRUIPool)
             {
                 addedWordTMPRUI.text = String.Empty;
@@ -90,6 +98,11 @@ namespace Scripts.Controller
             {
                 _addedWordTMPRUIPool[wordCount].gameObject.SetActive(true);
                 _addedWordTMPRUIPool[wordCount].text = addedWord;
+            }
+
+            if (wordCount > 2)
+            {
+                _addedWordScrollRect.verticalScrollbar.value = 1f - (wordCount - 2f) / 23f;
             }
 
             wordCount++;

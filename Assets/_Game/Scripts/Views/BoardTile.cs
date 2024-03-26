@@ -28,6 +28,10 @@ namespace Scripts.Views
         public bool removed = false;
         public bool inMove = false;
 
+        private float moveSpeed = 1200f;
+        public Vector2 _cacheVector;
+        public float duration;
+
         public void Init(GameBoardController gameBoardController,TileData tileData)
         {
             _gameBoardController = gameBoardController;
@@ -38,9 +42,9 @@ namespace Scripts.Views
 
             _openColor = new Color(1f,1f,1f,0f);
             _closedColor = new Color(1f,1f,1f,0.8f);
-
             ChangeView();
             MovePosition();
+            duration = 1f;
         }
         
 
@@ -63,15 +67,24 @@ namespace Scripts.Views
         private void MovePosition()
         {
             transform.position = _position + Vector3.up * 50;
-            transform.DOMove(_position,1.5f-((_position.y + 100)/30 - (_position.z - 99))/10f).SetEase(Ease.OutBack);
+            
+            float xDelay = (_position.x+50)/100f;
+            float yDelay = (_position.y + 50f) / 100f;
+            float zDelay = (_position.z + -70f) / 30f;
+            float delayTotal = xDelay + yDelay + zDelay;
+            
+            transform.DOMove(_position,delayTotal/2f).SetEase(Ease.OutBack);
         }
 
         public void MoveToWord(Vector3 movePosition)
         {
             inMove = true;
             transform.DOKill();
-            transform.DOMove(movePosition, 1f);
-            transform.DOScale(Vector3.one * 0.6f, 1f);
+            // _cacheVector = movePosition - transform.position;
+            // float duration = _cacheVector.sqrMagnitude / moveSpeed;
+            
+            transform.DOMove(movePosition, duration);
+            transform.DOScale(Vector3.one * 0.55f, duration);
             onBoard = false;
             //Decrease parent count because execute action move parent to word placement
             _gameBoardController.ChangeParentCount(children,-1);
@@ -80,8 +93,11 @@ namespace Scripts.Views
         public void MoveToTile(Vector3 mainPosition)
         {
             transform.DOKill();
-            transform.DOMove(mainPosition, 1f).OnComplete(ChangeOnMove);
-            transform.DOScale(Vector3.one, 1f);
+            // _cacheVector = mainPosition - transform.position;
+            // float duration = _cacheVector.sqrMagnitude / moveSpeed;
+            
+            transform.DOMove(mainPosition, duration).OnComplete(ChangeOnMove);
+            transform.DOScale(Vector3.one, duration);
             onBoard = true;
             //Increase parent count because undo action has moved a parent back
             _gameBoardController.ChangeParentCount(children,1);
@@ -102,6 +118,14 @@ namespace Scripts.Views
         public void Shake()
         {
             transform.DOShakePosition(0.5f);
+        }
+
+        public void Reset()
+        {
+            transform.localScale = Vector3.one;
+            inMove = false;
+            removed = false;
+            onBoard = true;
         }
     }
 }

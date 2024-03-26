@@ -3,6 +3,7 @@ using DG.Tweening;
 using strange.extensions.mediation.impl;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Scripts.Views
@@ -12,49 +13,79 @@ namespace Scripts.Views
         [SerializeField] private Button _onPlayButton;
         [SerializeField] private TextMeshProUGUI _levelName;
         [SerializeField] private TextMeshProUGUI _highScore;
-        [SerializeField] private GameObject _lockImage;
-
+        [SerializeField] private GameObject _lockImageHolder;
+        [SerializeField] private ParticleSystem _particleSystemStar;
+        [SerializeField] private ParticleSystem _particleSystemCelebration;
+        
+        [SerializeField] private Image _buttonImage;
+        [SerializeField] private TextMeshProUGUI _buttonText;
+        [SerializeField] private Image _lockImageBG;
+        [SerializeField] private Image _lockImage;
+        
         private LevelSelectionPanel _levelSelectionPanel;
         private int _id;
+        private bool _isLocked =false;
 
-        public void Init(LevelSelectionPanel levelSelectionPanel, int id, string name, int highScore,int lastUnlock)
+        private Color _cacheColor;
+        public void Init(LevelSelectionPanel levelSelectionPanel, int id, string name, int highScore,int lastUnlock,bool playAnim)
         {
+            
             _levelSelectionPanel = levelSelectionPanel;
             _levelName.text = "Level "+(id+1)+" - "+name;
             _id = id;
-            bool locked = false;
-
+            _isLocked = false;
+            
+            _cacheColor = new Color(1f,1f,1f,0f);
             
             if (highScore > 0)
             {
                 _highScore.text = "High Score: "+highScore;
-                locked = false;
+                _isLocked = false;
             }
             else if (id == 0)
             {
                 _highScore.text = "No Score";
-                locked = false;
+                _isLocked = false;
             }
             else if (id == lastUnlock)
             {
                 _highScore.text = "No Score";
-                locked = false;
-                PlayAnim();
+                _isLocked = false;
+                if (playAnim)
+                {
+                    _buttonImage.color = _cacheColor;
+                    _buttonText.color = _cacheColor;
+                    return;
+                }
             }
             else if (highScore == -1)
             {
                 _highScore.text = "Locked Level";
-                locked = true;
+                _isLocked = true;
             }
             
-            _onPlayButton.gameObject.SetActive(!locked);
-            _lockImage.SetActive(locked);
+            _onPlayButton.gameObject.SetActive(!_isLocked);
+            _lockImageHolder.SetActive(_isLocked);
         }
 
         public void PlayAnim()
         {
-            _onPlayButton.transform.localScale = new Vector3(1f,0f,1f);
-            _onPlayButton.transform.DOScale(Vector3.one, 1f);
+            _buttonImage.DOFade(1f, 1f).SetDelay(1f);
+            _buttonText.DOFade(1f, 1f).SetDelay(1f);
+            _lockImage.DOFade(0f, 1f);
+            _lockImageBG.DOFade(0f, 1f).OnComplete(Unlock);
+            
+            
+            // _onPlayButton.transform.localScale = new Vector3(1f,0f,1f);
+            // _onPlayButton.transform.DOScale(Vector3.one, 1f);
+            _particleSystemCelebration.Play();
+        }
+
+        public void Unlock()
+        {
+            _onPlayButton.gameObject.SetActive(!_isLocked);
+            _lockImageHolder.SetActive(_isLocked);
+            _particleSystemStar.Play();
         }
 
         protected override void OnEnable()
